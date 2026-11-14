@@ -1,49 +1,39 @@
-import { create } from 'zustand';
+import { useGameStore } from '../../store/useGameStore';
 
-export const useGameStore = create((set) => ({
-  solActual: 1,
+export default function PanelRecursos() {
+  // Aquí llamamos exactamente a las variables que ya tienes en tu motor (useGameStore)
+  const { oxigeno, hidroponia, blindaje } = useGameStore();
 
-  // --- 1. ESTADO DE LOS SISTEMAS (100% es óptimo) ---
-  celdasBateria: 100, // Escenario 2: La energía máxima disponible
-  oxigeno: 100,       // Escenario 1: Filtros de aire / Soporte Vital
-  blindaje: 100,      // Escenario 3: Escudo magnético contra viento solar
-  hidroponia: 100,    // Escenario 4: Plantas (riego y luces)
+  return (
+    <div style={{ padding: '20px', background: '#111827', color: 'white', borderRadius: '8px', marginBottom: '20px', border: '1px solid #374151' }}>
+      <h3 style={{ color: '#60a5fa', marginTop: 0 }}>📊 Estado de los Sistemas Vitales</h3>
+      
+      <div style={{ marginBottom: '10px' }}>
+        <p style={{ margin: '5px 0', display: 'flex', justifyContent: 'space-between' }}>
+          <span>🌬️ Filtros de Aire (O2)</span>
+          <span style={{ color: oxigeno < 30 ? '#ef4444' : '#a7f3d0', fontWeight: 'bold' }}>
+            {oxigeno.toFixed(1)}%
+          </span>
+        </p>
+      </div>
 
-  // --- 2. DISTRIBUCIÓN DE VATIOS (La tensión del juego) ---
-  wattsFiltros: 30,
-  wattsLucesRiego: 40,
-  wattsMagneto: 20,
+      <div style={{ marginBottom: '10px' }}>
+        <p style={{ margin: '5px 0', display: 'flex', justifyContent: 'space-between' }}>
+          <span>🌱 Módulo Hidropónico</span>
+          <span style={{ color: hidroponia < 30 ? '#ef4444' : '#a7f3d0', fontWeight: 'bold' }}>
+            {hidroponia.toFixed(1)}%
+          </span>
+        </p>
+      </div>
 
-  // --- 3. ACCIÓN: RECALIBRAR ENERGÍA ---
-  setAsignacion: (sistema, valor) => set((state) => {
-    const nuevoValor = parseInt(valor);
-    const estadoSimulado = { ...state, [sistema]: nuevoValor };
-    
-    // Verifica que no se usen más vatios de los que las celdas pueden dar
-    const consumoTotal = estadoSimulado.wattsFiltros + estadoSimulado.wattsLucesRiego + estadoSimulado.wattsMagneto;
-    
-    if (consumoTotal <= state.celdasBateria) {
-      return { [sistema]: nuevoValor };
-    }
-    return {}; 
-  }),
-
-  // --- 4. ACCIÓN: AVANZAR SOL (Impacto de los 4 escenarios) ---
-  avanzarSol: () => set((state) => {
-    // Escenario 1: Si faltan vatios en los filtros, el CO2 sube y el oxígeno cae rápido.
-    const nuevoOxigeno = state.oxigeno + 2 * (state.wattsFiltros - 30);
-    
-    // Escenario 4: Si faltan vatios en hidroponía, el frío daña la cosecha lentamente.
-    const nuevaHidroponia = state.hidroponia + 0.5 * (state.wattsLucesRiego - 40);
-    
-    // Escenario 3: Si faltan vatios en el magneto, el viento solar degrada el blindaje.
-    const nuevoBlindaje = state.blindaje + 1.5 * (state.wattsMagneto - 20); 
-
-    return {
-      solActual: state.solActual + 1,
-      oxigeno: Math.max(0, Math.min(100, nuevoOxigeno)),
-      hidroponia: Math.max(0, Math.min(100, nuevaHidroponia)),
-      blindaje: Math.max(0, Math.min(100, nuevoBlindaje)),
-    };
-  }),
-}));
+      <div style={{ marginBottom: '10px' }}>
+        <p style={{ margin: '5px 0', display: 'flex', justifyContent: 'space-between' }}>
+          <span>🛡️ Blindaje Magnético</span>
+          <span style={{ color: blindaje < 30 ? '#ef4444' : '#a7f3d0', fontWeight: 'bold' }}>
+            {blindaje.toFixed(1)}%
+          </span>
+        </p>
+      </div>
+    </div>
+  );
+}
